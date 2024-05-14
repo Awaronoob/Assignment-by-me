@@ -7,21 +7,32 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.sun.org.apache.bcel.internal.Const;
 
 public class SpaceScreen implements Screen {
     MyGame game;
 
     OrthographicCamera camera;
     TextureRegion shipTex;
+    TextureRegion meteorTex;
     Color bgColor;
 
     float MAX_SPEED = 500;
     Vector2 shipPos;
     Vector2 shipVel;
     float STEERING_FACTOR = 5;
+    Array<Circle> meteorRects;
+    Array<Vector2> meteorVects;
+    Vector2 meteorPos1 = new Vector2(-64, 240);
+    Vector2 meteorPos2 = new Vector2(400, -64);
+    Vector2 meteorPos3 = new Vector2(864, 240);
+    Vector2 meteorPos4 = new Vector2(400, 544);
 
     public SpaceScreen(MyGame game) {
         this.game = game;
@@ -32,6 +43,9 @@ public class SpaceScreen implements Screen {
         shipTex = new TextureRegion(new Texture(Gdx.files.internal("ship_L.png")));
         shipPos = new Vector2();
         shipVel = new Vector2();
+        meteorTex = new TextureRegion(new Texture(Gdx.files.internal("meteor_detailedLarge.png")));
+        meteorRects = new Array<Circle>();
+
     }
 
     @Override
@@ -91,6 +105,7 @@ public class SpaceScreen implements Screen {
             1.0f, 1.0f,
             MathUtils.radiansToDegrees * rotationRad
         );
+        game.batch.draw(meteorTex, 250, 250);
         game.batch.end();
     }
 
@@ -118,4 +133,42 @@ public class SpaceScreen implements Screen {
     public void dispose() {
 
     }
+    public void createMeteor() {
+        int spawnPos = MathUtils.random(1, 4);
+        int posDeg;
+        switch (spawnPos) {
+            case 1:
+                posDeg = MathUtils.random(135, 225);
+                break;
+            case 2:
+                posDeg = MathUtils.random(45, 135);
+                break;
+            case 3:
+                int posDeg3Option1 = MathUtils.random(315, 360);
+                int posDeg3Option2 = MathUtils.random(0, 45);
+                int posDeg3Decider = MathUtils.random(1, 2);
+                if (posDeg3Decider == 1) {
+                    posDeg = posDeg3Option1;
+                }
+                else {
+                    posDeg = posDeg3Option2;
+                }
+                break;
+            case 4:
+                posDeg = MathUtils.random(225, 315);
+                break;
+        }
+        float posRad = posDeg * MathUtils.degreesToRadians;
+        Vector2 posVect = new Vector2(MathUtils.cos(posRad), MathUtils.sin(posDeg));
+
+
+        //Circle meteor = new Circle(null, null, 32);
+
+
+    }
+
+
 }
+//screen size:
+//height 480px
+//with 800px
