@@ -29,12 +29,13 @@ public class SpaceScreen implements Screen {
     float STEERING_FACTOR = 5;
     Array<Circle> meteorCircs;
     Array<Vector2> meteorVects;
+    int lifes;
     float meteorSpeed = 350;
     Vector2 meteorPos1 = new Vector2(-64, 240);
     Vector2 meteorPos2 = new Vector2(400, -64);
     Vector2 meteorPos3 = new Vector2(864, 240);
     Vector2 meteorPos4 = new Vector2(400, 544);
-
+    Circle shipRect;
     public SpaceScreen(MyGame game) {
         this.game = game;
 
@@ -46,6 +47,10 @@ public class SpaceScreen implements Screen {
         shipVel = new Vector2();
         meteorTex = new TextureRegion(new Texture(Gdx.files.internal("meteor_detailedLarge.png")));
         meteorCircs = new Array<Circle>();
+        meteorVects = new Array<Vector2>();
+        createMeteor();
+        shipRect = new Circle(shipPos.x, shipPos.y, shipTex.getRegionWidth()/2f - 10);
+        lifes = 1;
 
     }
 
@@ -60,10 +65,25 @@ public class SpaceScreen implements Screen {
 
         Vector2 dir = new Vector2();
 
-        for (int i = 0;i == meteorCircs.size; i++) {
+
+
+
+        for (int i = 0;i < meteorVects.size; i++) {
             Circle setter = new Circle(meteorVects.get(i), 34);
             meteorCircs.set(i, setter);
         }
+
+        //collision
+
+        for (int i = 0; i < meteorCircs.size; i++) {
+            if (meteorCircs.get(i).overlaps(shipRect)) {
+                lifes--;
+                System.out.println("lifes -1, lifes = " + lifes);
+            }
+        }
+
+
+
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             dir.add(0, 1);
@@ -99,6 +119,8 @@ public class SpaceScreen implements Screen {
         float rotationRad = MathUtils.atan2(shipVelDelta.y, shipVelDelta.x); // rad
         shipPos.add(shipVelDelta);
 
+        shipRect.setPosition(shipPos.x, shipPos.y);
+
         ScreenUtils.clear(bgColor);
 
         game.batch.setProjectionMatrix(camera.combined);
@@ -111,8 +133,11 @@ public class SpaceScreen implements Screen {
             1.0f, 1.0f,
             MathUtils.radiansToDegrees * rotationRad
         );
-        game.batch.draw(meteorTex, 250, 250);
+        for (int i = 0; i < meteorVects.size; i++ ) {
+            game.batch.draw(meteorTex, (meteorVects.get(i)).x, (meteorVects.get(i)).y);
+        }
         game.batch.end();
+
     }
 
 
@@ -138,12 +163,13 @@ public class SpaceScreen implements Screen {
 
     @Override
     public void dispose() {
+        meteorTex.getTexture().dispose();
 
     }
     public void createMeteor() {
         int spawnPos = MathUtils.random(1, 4);
         int posDeg = 0;
-        Vector2 meteorPos = new Vector2(null);
+        Vector2 meteorPos = new Vector2(0, 0);
         switch (spawnPos) {
             case 1:
                 posDeg = MathUtils.random(135, 225);
@@ -171,9 +197,8 @@ public class SpaceScreen implements Screen {
                 break;
         }
         float posRad = posDeg * MathUtils.degreesToRadians;
-        Vector2 posVect = new Vector2(MathUtils.cos(posRad), MathUtils.sin(posDeg));
+        Vector2 posVect = new Vector2(MathUtils.cos(posRad), MathUtils.sin(posRad));
         posVect = posVect.scl(meteorSpeed);
-        posVect = posVect.scl(Gdx.graphics.getDeltaTime());
         meteorVects.add(posVect);
         Circle meteor = new Circle(meteorPos.x, meteorPos.y, 32);
         meteorCircs.add(meteor);
