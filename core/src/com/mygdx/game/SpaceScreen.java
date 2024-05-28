@@ -36,6 +36,7 @@ public class SpaceScreen implements Screen {
     Vector2 meteorPos3 = new Vector2(864, 240);
     Vector2 meteorPos4 = new Vector2(400, 544);
     Circle shipRect;
+    Integer meteorTime = 0;
     public SpaceScreen(MyGame game) {
         this.game = game;
 
@@ -48,6 +49,9 @@ public class SpaceScreen implements Screen {
         meteorTex = new TextureRegion(new Texture(Gdx.files.internal("meteor_detailedLarge.png")));
         meteorCircs = new Array<Circle>();
         meteorVects = new Array<Vector2>();
+        createMeteor();
+        createMeteor();
+        createMeteor();
         createMeteor();
         shipRect = new Circle(shipPos.x, shipPos.y, shipTex.getRegionWidth()/2f - 10);
         lifes = 1;
@@ -65,13 +69,16 @@ public class SpaceScreen implements Screen {
 
         Vector2 dir = new Vector2();
 
-
-
+        meteorTime++;
 
         for (int i = 0;i < meteorVects.size; i++) {
-            Circle setter = new Circle(meteorVects.get(i), 34);
-            meteorCircs.set(i, setter);
+            Vector2 velocity = meteorVects.get(i);
+            Circle meteor = meteorCircs.get(i);
+            meteor.x += velocity.x * Gdx.graphics.getDeltaTime();
+            meteor.y += velocity.y * Gdx.graphics.getDeltaTime();
         }
+
+
 
         //collision
 
@@ -133,10 +140,19 @@ public class SpaceScreen implements Screen {
             1.0f, 1.0f,
             MathUtils.radiansToDegrees * rotationRad
         );
-        for (int i = 0; i < meteorVects.size; i++ ) {
-            game.batch.draw(meteorTex, (meteorVects.get(i)).x, (meteorVects.get(i)).y);
+        for (int i = 0; i < meteorCircs.size; i++ ) {
+            game.batch.draw(meteorTex, (meteorCircs.get(i)).x, (meteorVects.get(i)).y);
         }
         game.batch.end();
+
+        if (meteorTime == 6000); {
+            createMeteor();
+            createMeteor();
+            createMeteor();
+            createMeteor();
+        }
+
+
 
     }
 
@@ -173,11 +189,11 @@ public class SpaceScreen implements Screen {
         switch (spawnPos) {
             case 1:
                 posDeg = MathUtils.random(135, 225);
-                meteorPos = new Vector2(meteorPos1);
+                meteorPos.set(meteorPos1);
                 break;
             case 2:
                 posDeg = MathUtils.random(45, 135);
-                meteorPos = new Vector2(meteorPos2);
+                meteorPos.set(meteorPos2);
                 break;
             case 3:
                 int posDeg3Option1 = MathUtils.random(315, 360);
@@ -189,11 +205,11 @@ public class SpaceScreen implements Screen {
                 else {
                     posDeg = posDeg3Option2;
                 }
-                meteorPos = new Vector2(meteorPos3);
+                meteorPos.set(meteorPos3);
                 break;
             case 4:
                 posDeg = MathUtils.random(225, 315);
-                meteorPos = new Vector2(meteorPos4);
+                meteorPos.set(meteorPos4);
                 break;
         }
         float posRad = posDeg * MathUtils.degreesToRadians;
