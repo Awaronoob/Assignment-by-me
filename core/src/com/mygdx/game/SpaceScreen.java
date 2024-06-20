@@ -15,6 +15,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.sun.org.apache.bcel.internal.Const;
 
+import java.text.Normalizer;
+
 public class SpaceScreen implements Screen {
     MyGame game;
 
@@ -22,6 +24,7 @@ public class SpaceScreen implements Screen {
     TextureRegion shipTex;
     TextureRegion meteorTex;
     Color bgColor;
+    TextureRegion lazerTex;
 
     float MAX_SPEED = 500;
     Vector2 shipPos;
@@ -29,6 +32,8 @@ public class SpaceScreen implements Screen {
     float STEERING_FACTOR = 5;
     Array<Circle> meteorCircs;
     Array<Vector2> meteorVects;
+    Array<Circle> lazerCircs;
+    private static final int lazerSpeed = 800;
     int lifes;
     float meteorSpeed = 350;
     Vector2 meteorPos1 = new Vector2(-64, 240);
@@ -37,6 +42,9 @@ public class SpaceScreen implements Screen {
     Vector2 meteorPos4 = new Vector2(400, 544);
     Circle shipRect;
     Integer meteorTime = 0;
+    Array<Vector2> lazerVects;
+
+
     public SpaceScreen(MyGame game) {
         this.game = game;
 
@@ -47,6 +55,7 @@ public class SpaceScreen implements Screen {
         shipPos = new Vector2();
         shipVel = new Vector2();
         meteorTex = new TextureRegion(new Texture(Gdx.files.internal("meteor_detailedLarge.png")));
+        lazerTex = new TextureRegion(new Texture(Gdx.files.internal("star_small.png")));
         meteorCircs = new Array<Circle>();
         meteorVects = new Array<Vector2>();
         createMeteor();
@@ -55,6 +64,8 @@ public class SpaceScreen implements Screen {
         createMeteor();
         shipRect = new Circle(shipPos.x, shipPos.y, shipTex.getRegionWidth()/2f - 10);
         lifes = 1;
+        lazerVects = new Array<Vector2>();
+        lazerCircs = new Array<Circle>();
 
     }
 
@@ -68,8 +79,13 @@ public class SpaceScreen implements Screen {
         camera.update();
 
         Vector2 dir = new Vector2();
-
         meteorTime++;
+
+
+
+
+
+
 
         for (int i = 0;i < meteorVects.size; i++) {
             Vector2 velocity = meteorVects.get(i);
@@ -77,6 +93,14 @@ public class SpaceScreen implements Screen {
             meteor.x += velocity.x * Gdx.graphics.getDeltaTime();
             meteor.y += velocity.y * Gdx.graphics.getDeltaTime();
         }
+
+        for (int i = 0; i < lazerVects.size; i++) {
+            Circle circle = lazerCircs.get(i);
+            Vector2 vect = lazerVects.get(i);
+            circle.x += vect.x * Gdx.graphics.getDeltaTime();
+            circle.y += vect.y * Gdx.graphics.getDeltaTime();
+        }
+
 
 
 
@@ -86,6 +110,12 @@ public class SpaceScreen implements Screen {
             if (meteorCircs.get(i).overlaps(shipRect)) {
                 lifes--;
                 System.out.println("lifes -1, lifes = " + lifes);
+            }
+        }
+
+        for (int i = 0; i < lazerCircs.size; i++) {
+            if (lazerCircs.get(i).overlaps(meteorCircs.get(i))) {
+                meteorCircs.removeIndex(i);
             }
         }
 
@@ -106,6 +136,15 @@ public class SpaceScreen implements Screen {
 
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             dir.add(1, 0);
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            Circle circle = new Circle(shipPos, 10);
+            Vector2 vect = new Vector2(shipVel);
+            vect.nor();
+            vect.scl(lazerSpeed);
+            lazerCircs.add(circle);
+            lazerVects.add(vect);
         }
 
         dir.nor();
@@ -132,6 +171,9 @@ public class SpaceScreen implements Screen {
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
+        for (int i = 0; i < lazerCircs.size; i++) {
+            game.batch.draw(lazerTex, lazerCircs.get(i).x, lazerCircs.get(i).y);
+        }
         game.batch.draw(
             shipTex,
             shipPos.x, shipPos.y,
@@ -140,16 +182,19 @@ public class SpaceScreen implements Screen {
             1.0f, 1.0f,
             MathUtils.radiansToDegrees * rotationRad
         );
+
         for (int i = 0; i < meteorCircs.size; i++ ) {
             game.batch.draw(meteorTex, (meteorCircs.get(i)).x, (meteorVects.get(i)).y);
         }
+
         game.batch.end();
 
-        if (meteorTime == 6000); {
+        if (meteorTime == 6000) {
             createMeteor();
             createMeteor();
             createMeteor();
             createMeteor();
+            meteorTime = 0;
         }
 
 
