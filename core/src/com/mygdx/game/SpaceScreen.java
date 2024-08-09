@@ -112,11 +112,14 @@ public class SpaceScreen implements Screen {
                 System.out.println("lifes -1, lifes = " + lifes);
             }
         }
-
-        for (int i = 0; i < lazerCircs.size; i++) {
-            if (lazerCircs.get(i).overlaps(meteorCircs.get(i))) {
-                meteorCircs.removeIndex(i);
+        //doesn't want to work :(
+        for (int i = 0; i < meteorCircs.size; i++) {
+            for (int j = 0; j < lazerCircs.size; j++) {
+                if (lazerCircs.get(j).overlaps(meteorCircs.get(i))) {
+                    meteorCircs.removeIndex(i);
+                }
             }
+
         }
 
 
